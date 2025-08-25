@@ -53,3 +53,38 @@ src/
 │   └── firebase.js
 │── middlewares/         # Middlewares customizados
 │── utils/               # Funções auxiliares
+```
+
+## 📈 Progresso do Projeto
+
+| Etapa  | Conteúdo | Status          | Data de Conclusão |
+|--------|----------|-----------------|-------------------|
+| Etapa 1 | Configuração inicial do projeto (Node + Express) | ✅ Concluído | 25/08/2025 |
+| Etapa 2 | Integração com Firebase | 🔄 Em andamento | -- |
+| Etapa 3 | Implementação de Controllers e Rotas | ⏳ Pendente | -- |
+| Etapa 4 | Testes com Postman | ⏳ Pendente | -- |
+| Etapa 5 | Deploy e Documentação (Swagger) | ⏳ Pendente | -- |
+
+📅 Atualizado em: **25/08/2025**
+
+---
+
+## ⚙️ Funcionalidades
+
+| Funcionalidade | Descrição | Status |
+|----------------|-----------|--------|
+| 👤 Criar Usuário | Permite cadastrar um novo usuário no Firebase | ⏳ Em desenvolvimento |
+| 📋 Listar Usuários | Retorna todos os usuários cadastrados | ⏳ Pendente |
+| 🔍 Buscar Usuário por ID | Retorna os dados de um usuário específico | ⏳ Pendente |
+| ✏️ Atualizar Usuário | Permite editar dados de um usuário existente | ⏳ Pendente |
+| ❌ Deletar Usuário | Remove um usuário do Firebase | ⏳ Pendente |
+| 🔑 Autenticação | Login e proteção de rotas com Firebase Auth | ⏳ Pendente |
+
+---
+
+## ✍️ Notas do Desenvolvimento
+
+- [x] Seguir boas práticas de organização usando **MVC**  
+- [x] Utilizar o **Firebase Admin SDK** para autenticação e banco de dados  
+- [ ] Criar documentação clara com **Swagger**  
+- [ ] Implementar autenticação e middleware de segurança  
