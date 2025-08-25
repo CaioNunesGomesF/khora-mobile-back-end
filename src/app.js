@@ -1,9 +1,13 @@
-import express from 'express';
-import userRoutes from './routes/user.routes.js';
+import express from "express";
 
 const app = express();
 
-app.use(express.json()); // para receber JSON
-app.use('/users', userRoutes); // monta as rotas
+// Middlewares
+app.use(express.json());
 
-export default app;
+// Rotas de exemplo
+app.get("/", (req, res) => {
+  res.send("Servidor funcionando!");
+});
+
+export default app; // ← ESSENCIAL
