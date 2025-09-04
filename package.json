@@ -5,8 +5,7 @@
   "main": "src/server.js",
   "type": "module",
   "directories": {
-    "doc": "docs",
-    "test": "tests"
+    "doc": "docs"
   },
   "scripts": {
     "start": "node src/server.js",
@@ -23,8 +22,10 @@
   },
   "homepage": "https://github.com/CaioNunesGomesF/Khora_Mobile_Back_End#readme",
   "dependencies": {
+    "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
-    "firebase-admin": "^13.4.0"
+    "firebase-admin": "^13.4.0",
+    "pg": "^8.16.3"
   }
 }
