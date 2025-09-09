@@ -1,5 +1,6 @@
 import express from 'express';
 import authMiddleware from '../middlewares/auth.middleware.js';
+import * as profileController from '../controllers/profileController.js';
 
 const router = express.Router();
 
@@ -13,5 +14,9 @@ router.get('/profile', authMiddleware, (req, res) => {
         user: req.user
     });
 });
+
+//rota para salvar o perfil de saúde
+router.post('/onboarding/profile', authMiddleware, profileController.saveProfile);
+
 
 export default router;
