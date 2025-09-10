@@ -26,4 +26,10 @@ router.post('/diary', authMiddleware, diaryController.createDiaryEntry);
 //rota para listar registros.
 router.get('/diary', authMiddleware, diaryController.getDiaryEntries);
 
+//rota para atualizar o registro.
+router.put('/diary/:id', authMiddleware, diaryController.updateDiaryEntry);
+
+//rota para deletar registro.
+router.delete('/diary/:id', authMiddleware, diaryController.deleteDiaryEntry);
+
 export default router;
