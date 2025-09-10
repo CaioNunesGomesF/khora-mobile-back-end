@@ -1,6 +1,8 @@
 import express from 'express';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import * as profileController from '../controllers/profileController.js';
+import * as diaryController from '../controllers/diaryController.js';
+
 
 const router = express.Router();
 
@@ -17,6 +19,9 @@ router.get('/profile', authMiddleware, (req, res) => {
 
 //rota para salvar o perfil de saúde
 router.post('/onboarding/profile', authMiddleware, profileController.saveProfile);
+
+//rota para salvar os registros diários
+router.post('/diary', authMiddleware, diaryController.createDiaryEntry);
 
 
 export default router;
