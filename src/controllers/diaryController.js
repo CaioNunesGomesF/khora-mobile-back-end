@@ -26,3 +26,15 @@ export const createDiaryEntry = (req, res) => {
       res.status(500).json({ message: 'Algo deu errado no servidor.', error: error.message });
   }
 }
+
+export const getDiaryEntries = (req, res) => {
+    try {
+
+        const userId = req.user.id;
+        const userDiaryEntries = registrosDiario.filter(registro => registro.usuarioId === userId);
+        res.status(200).json(userDiaryEntries);
+
+    } catch (error) {
+        res.status(500).json({ message: 'Algo deu errado no servidor.', error: error.message });
+    }
+}

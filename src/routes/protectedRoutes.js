@@ -23,5 +23,7 @@ router.post('/onboarding/profile', authMiddleware, profileController.saveProfile
 //rota para salvar os registros diários
 router.post('/diary', authMiddleware, diaryController.createDiaryEntry);
 
+//rota para listar registros.
+router.get('/diary', authMiddleware, diaryController.getDiaryEntries);
 
 export default router;
