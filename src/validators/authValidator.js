@@ -10,7 +10,7 @@ export const registerRules = () => {
             .normalizeEmail(), // Sanitização: remove pontos ou extensões do gmail, etc.
 
         // A senha deve ter no mínimo 6 caracteres
-        body('password')
+        body('password_hash')
             .isLength({ min: 6 })
             .withMessage('A senha deve ter no mínimo 6 caracteres.'),
     ];
@@ -22,7 +22,7 @@ export const loginRules = () => {
         body('email')
             .isEmail()
             .withMessage('Por favor, forneça um email válido.'),
-        body('password')
+        body('password_hash')
             .notEmpty()
             .withMessage('A senha é obrigatória.'),
     ];

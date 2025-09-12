@@ -1,38 +1,40 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
+import { PrismaClient } from '../generated/prisma/index.js';
 
-const users = []; // Array para armazenar os usuários cadastrados temporariamente
+const prisma = new PrismaClient();
 
 export const register = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { name, email, password_hash } = req.body;
 
         // A validação de existência de email/senha já foi feita pelo middleware!
 
         // 1. Verifica se o usuário já existe
-        const existingUser = users.find(user => user.email === email);
+        const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
             return res.status(400).json({ message: 'Usuário com este email já existe.' });
         }
 
         // 2. Criptografa a senha
         const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        const hashedPassword = await bcrypt.hash(password_hash, salt);
 
+        const data = {
+                id: crypto.randomUUID(),
+                name: name,
+                email: email,
+                password_hash: hashedPassword,
+            }
         // 3. Cria o novo usuário
-        const newUser = {
-            id: users.length + 1,
-            email: email,
-            password: hashedPassword,
-        };
+        const newUser = await prisma.user.create({ data });
 
-        // 4. "Salva" o usuário
-        users.push(newUser);
-        console.log('Usuários cadastrados:', users);
+        // 4. Remove a senha da resposta
+        delete newUser.password_hash;
 
         // 5. Responde com sucesso
-        res.status(201).json({ message: 'Usuário registrado com sucesso!', userId: newUser.id });
+        res.status(201).json({ message: 'Usuário registrado com sucesso!'}, newUser);
 
     } catch (error) {
         res.status(500).json({ message: 'Algo deu errado no servidor.', error: error.message });
@@ -42,18 +44,19 @@ export const register = async (req, res) => {
 // Função de Login
 export const login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password_hash } = req.body;
 
         // A validação de existência de email/senha já foi feita pelo middleware!
 
         // 1. Encontra o usuário
-        const user = users.find(user => user.email === email);
+        const user = await prisma.user.findUnique({ where: { email } });
         if (!user) {
             return res.status(401).json({ message: 'Credenciais inválidas.' });
         }
 
         // 2. Compara a senha
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password_hash, user.password_hash);
+
         if (!isMatch) {
             return res.status(401).json({ message: 'Credenciais inválidas.' });
         }

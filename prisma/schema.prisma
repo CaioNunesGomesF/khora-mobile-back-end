@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model conquista {
+  id             String           @id @db.Uuid
+  nome           String           @unique @db.VarChar
+  descricao      String
+  icone_url      String?          @db.VarChar
+  user_conquista user_conquista[]
+}
+
+model doenca {
+  id          String        @id @db.Uuid
+  nome        String        @unique @db.VarChar
+  user_doenca user_doenca[]
+}
+
+model habito {
+  id               String             @id @db.Uuid
+  nome             String             @unique @db.VarChar
+  descricao        String?
+  categoria        String?            @db.VarChar
+  progresso_habito progresso_habito[]
+}
+
+model perfil_usuario {
+  id              String    @id @db.Uuid
+  user_id         String    @unique @db.Uuid
+  data_nascimento DateTime? @db.Date
+  altura_cm       Int?
+  peso_kg         Decimal?  @db.Decimal(5, 2)
+  genero          String?   @db.VarChar
+  user            user      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model progresso_habito {
+  id                  String    @id @db.Uuid
+  user_id             String    @db.Uuid
+  habito_id           String    @db.Uuid
+  data_inicio         DateTime  @default(now()) @db.Timestamp(6)
+  meta_pessoal        String?
+  ultima_recaida      DateTime? @db.Date
+  custo_diario_habito Decimal?  @db.Decimal(10, 2)
+  habito              habito    @relation(fields: [habito_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user                user      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model user {
+  id               String             @id @db.Uuid
+  name             String             @db.VarChar
+  email            String             @unique @db.VarChar
+  password_hash    String             @db.VarChar
+  created_at       DateTime           @default(now()) @db.Timestamp(6)
+  perfil_usuario   perfil_usuario?
+  progresso_habito progresso_habito[]
+  user_conquista   user_conquista[]
+  user_doenca      user_doenca[]
+}
+
+model user_conquista {
+  id             String    @id @db.Uuid
+  user_id        String    @db.Uuid
+  conquista_id   String    @db.Uuid
+  data_conquista DateTime  @default(now()) @db.Timestamp(6)
+  conquista      conquista @relation(fields: [conquista_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user           user      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([user_id, conquista_id], map: "user_conquista_user_id_conquista_id_idx")
+}
+
+model user_doenca {
+  user_id   String @db.Uuid
+  doenca_id String @db.Uuid
+  doenca    doenca @relation(fields: [doenca_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user      user   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([user_id, doenca_id])
+}
