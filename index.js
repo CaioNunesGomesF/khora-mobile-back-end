@@ -3,6 +3,7 @@ import 'dotenv/config';
 import authRoutes from './src/routes/authRoutes.js';
 import protectedRoutes from './src/routes/protectedRoutes.js';
 import chatRoutes from './src/routes/chatRoutes.js';
+import contents from './src/routes/contentsRoutes.js';
 
 const app = express();
 
@@ -23,6 +24,9 @@ app.use('/api/auth', authRoutes);
 // Todas as rotas definidas em `protectedRoutes` agora exigirão um token.
 // Chama o endpoint que conecta ao chatbot
 app.use('/api', protectedRoutes, chatRoutes);
+
+//Rota para conteúdo
+app.use('/api/conteudo', contents);
 
 // Inicia o servidor
 app.listen(PORT, () => {
