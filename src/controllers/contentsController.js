@@ -103,6 +103,40 @@ class ConteudoController {
         }
     }
 
+    // Criar novo conteúdo
+    static async criarConteudo(req, res) {
+        try {
+            const { titulo, descricao_curta, conteudo_completo, url_externa, thumbnail_url, duracao_minutos, nivel_dificuldade, autor, fonte_credivel, categoria_id, tipo_conteudo_id, tags } = req.body;
+
+            if (!titulo || !descricao_curta || !categoria_id || !tipo_conteudo_id) {
+                return res.status(400).json({ error: 'Campos obrigatórios faltando (titulo, descricao_curta, categoria_id, tipo_conteudo_id)' });
+            }
+
+            const created = await prisma.conteudo.create({
+                data: {
+                    titulo,
+                    descricao_curta,
+                    conteudo_completo: conteudo_completo ?? null,
+                    url_externa: url_externa ?? null,
+                    thumbnail_url: thumbnail_url ?? null,
+                    duracao_minutos: duracao_minutos ?? null,
+                    nivel_dificuldade: nivel_dificuldade ?? null,
+                    autor: autor ?? null,
+                    fonte_credivel: fonte_credivel ?? null,
+                    categoria_id,
+                    tipo_conteudo_id,
+                    tags: tags && Array.isArray(tags) ? { create: tags.map(t => ({ tag: { connectOrCreate: { where: { nome: t }, create: { nome: t } } } })) } : undefined
+                },
+                include: { categoria: true, tipo_conteudo: true, tags: { include: { tag: true } } }
+            });
+
+            return res.status(201).json(created);
+        } catch (error) {
+            console.error('Erro ao criar conteúdo:', error);
+            return res.status(500).json({ error: 'Erro ao criar conteúdo' });
+        }
+    }
+
     // Pesquisar conteúdos
     static async pesquisar(req, res) {
         try {

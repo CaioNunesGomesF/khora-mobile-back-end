@@ -53,16 +53,18 @@ model progresso_habito {
 }
 
 model user {
-  id               String             @id @db.Uuid
-  name             String             @db.VarChar
-  email            String             @unique @db.VarChar
-  password_hash    String             @db.VarChar
-  created_at       DateTime           @default(now()) @db.Timestamp(6)
+  id               String               @id @db.Uuid
+  name             String               @db.VarChar
+  email            String               @unique @db.VarChar
+  password_hash    String               @db.VarChar
+  created_at       DateTime             @default(now()) @db.Timestamp(6)
   perfil_usuario   perfil_usuario?
   progresso_habito progresso_habito[]
   user_conquista   user_conquista[]
   user_doenca      user_doenca[]
   avaliacoes       avaliacao_conteudo[]
+  reminder_setting reminder_setting?
+  user_checkup     user_checkup[]
 }
 
 model user_conquista {
@@ -86,16 +88,16 @@ model user_doenca {
 }
 
 model categoria_conteudo {
-  id          String     @id @default(uuid()) @db.Uuid
-  nome        String     @unique @db.VarChar(100)
-  descricao   String?
-  icone_url   String?    @db.VarChar(500)
-  cor_hex     String?    @db.VarChar(7)
-  ordem       Int        @default(0)
-  ativo       Boolean    @default(true)
-  created_at  DateTime   @default(now()) @db.Timestamp(6)
-  updated_at  DateTime   @updatedAt @db.Timestamp(6)
-  conteudos   conteudo[]
+  id         String     @id @default(uuid()) @db.Uuid
+  nome       String     @unique @db.VarChar(100)
+  descricao  String?
+  icone_url  String?    @db.VarChar(500)
+  cor_hex    String?    @db.VarChar(7)
+  ordem      Int        @default(0)
+  ativo      Boolean    @default(true)
+  created_at DateTime   @default(now()) @db.Timestamp(6)
+  updated_at DateTime   @updatedAt @db.Timestamp(6)
+  conteudos  conteudo[]
 }
 
 model tipo_conteudo {
@@ -107,30 +109,30 @@ model tipo_conteudo {
 }
 
 model conteudo {
-  id                 String             @id @default(uuid()) @db.Uuid
-  titulo             String             @db.VarChar(200)
-  descricao_curta    String             @db.VarChar(500)
-  conteudo_completo  String?            @db.Text
-  url_externa        String?            @db.VarChar(1000)
-  thumbnail_url      String?            @db.VarChar(500)
-  duracao_minutos    Int?
-  nivel_dificuldade  String?            @db.VarChar(20) // BASICO, INTERMEDIARIO, AVANCADO
-  autor              String?            @db.VarChar(100)
-  fonte_credivel     String?            @db.VarChar(200)
-  categoria_id       String             @db.Uuid
-  tipo_conteudo_id   String             @db.Uuid
-  visualizacoes      Int                @default(0)
-  likes              Int                @default(0)
-  ativo              Boolean            @default(true)
-  destaque           Boolean            @default(false)
-  created_at         DateTime           @default(now()) @db.Timestamp(6)
-  updated_at         DateTime           @updatedAt @db.Timestamp(6)
+  id                String   @id @default(uuid()) @db.Uuid
+  titulo            String   @db.VarChar(200)
+  descricao_curta   String   @db.VarChar(500)
+  conteudo_completo String?  @db.Text
+  url_externa       String?  @db.VarChar(1000)
+  thumbnail_url     String?  @db.VarChar(500)
+  duracao_minutos   Int?
+  nivel_dificuldade String?  @db.VarChar(20) // BASICO, INTERMEDIARIO, AVANCADO
+  autor             String?  @db.VarChar(100)
+  fonte_credivel    String?  @db.VarChar(200)
+  categoria_id      String   @db.Uuid
+  tipo_conteudo_id  String   @db.Uuid
+  visualizacoes     Int      @default(0)
+  likes             Int      @default(0)
+  ativo             Boolean  @default(true)
+  destaque          Boolean  @default(false)
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+  updated_at        DateTime @updatedAt @db.Timestamp(6)
 
-  categoria          categoria_conteudo @relation(fields: [categoria_id], references: [id], onDelete: Cascade)
-  tipo_conteudo      tipo_conteudo      @relation(fields: [tipo_conteudo_id], references: [id], onDelete: Cascade)
+  categoria     categoria_conteudo @relation(fields: [categoria_id], references: [id], onDelete: Cascade)
+  tipo_conteudo tipo_conteudo      @relation(fields: [tipo_conteudo_id], references: [id], onDelete: Cascade)
 
-  tags               conteudo_tag[]
-  avaliacoes         avaliacao_conteudo[]
+  tags       conteudo_tag[]
+  avaliacoes avaliacao_conteudo[]
 }
 
 model tag {
@@ -154,12 +156,37 @@ model avaliacao_conteudo {
   id          String   @id @default(uuid()) @db.Uuid
   user_id     String   @db.Uuid
   conteudo_id String   @db.Uuid
-  rating      Int      // 1-5
+  rating      Int // 1-5
   comentario  String?  @db.Text
   created_at  DateTime @default(now()) @db.Timestamp(6)
 
-  user        user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  conteudo    conteudo @relation(fields: [conteudo_id], references: [id], onDelete: Cascade)
+  user     user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  conteudo conteudo @relation(fields: [conteudo_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, conteudo_id])
+}
+
+// Configurações de lembretes de checkups por usuário
+model reminder_setting {
+  id             String    @id @default(uuid()) @db.Uuid
+  user_id        String    @unique @db.Uuid
+  enabled        Boolean   @default(true)
+  frequency_days Int?
+  next_send      DateTime?
+  fcm_token      String?   @db.VarChar(500)
+
+  user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+// Checkups agendados/registrados pelo usuário
+model user_checkup {
+  id             String   @id @default(uuid()) @db.Uuid
+  user_id        String   @db.Uuid
+  nome           String   @db.VarChar(200)
+  descricao      String?  @db.Text
+  data_prevista  DateTime @db.Timestamp(6)
+  lembrete_ativo Boolean  @default(true)
+  criado_em      DateTime @default(now()) @db.Timestamp(6)
+
+  user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }

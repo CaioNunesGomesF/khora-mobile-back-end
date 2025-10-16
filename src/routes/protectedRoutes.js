@@ -4,6 +4,7 @@ import * as profileController from '../controllers/profileController.js';
 import * as diaryController from '../controllers/diaryController.js';
 import * as dashboardController from '../controllers/dashboardController.js';
 import * as analyticsController from '../controllers/analyticsController.js';
+import * as checkupsController from '../controllers/checkupsController.js';
 
 
 const router = express.Router();
@@ -37,5 +38,17 @@ router.get('/analytics', authMiddleware, analyticsController.getAnalytics);
 
 //rota para buscar insights específicos
 router.get('/insights', authMiddleware, analyticsController.getInsights);
+
+// Checkups: timeline e lembretes
+router.get('/checkups/timeline', authMiddleware, checkupsController.getTimeline);
+router.post('/checkups/reminder', authMiddleware, checkupsController.setReminder);
+router.post('/checkups/reminder/toggle', authMiddleware, checkupsController.toggleReminder);
+router.post('/checkups/reminder/test', authMiddleware, checkupsController.triggerTestNotification);
+
+// CRUD de checkups do usuário
+router.get('/checkups', authMiddleware, checkupsController.listUserCheckups);
+router.post('/checkups', authMiddleware, checkupsController.createUserCheckup);
+router.put('/checkups/:id', authMiddleware, checkupsController.updateUserCheckup);
+router.delete('/checkups/:id', authMiddleware, checkupsController.deleteUserCheckup);
 
 export default router;
