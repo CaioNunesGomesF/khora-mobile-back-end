@@ -4,6 +4,9 @@ import authRoutes from './src/routes/authRoutes.js';
 import protectedRoutes from './src/routes/protectedRoutes.js';
 import chatRoutes from './src/routes/chatRoutes.js';
 import contents from './src/routes/contentsRoutes.js';
+import swaggerUi from 'swagger-ui-express';
+import fs from 'fs';
+import path from 'path';
 
 const app = express();
 
@@ -27,6 +30,18 @@ app.use('/api', protectedRoutes, chatRoutes);
 
 //Rota para conteúdo
 app.use('/api/conteudo', contents);
+
+// Swagger UI
+try {
+    const swaggerPath = path.resolve('docs/swagger.json');
+    if (fs.existsSync(swaggerPath)) {
+        const swaggerDocument = JSON.parse(fs.readFileSync(swaggerPath, 'utf-8'));
+        app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+        console.log('Swagger UI disponível em /docs');
+    }
+} catch (err) {
+    console.warn('Não foi possível carregar swagger.json:', err.message);
+}
 
 // Inicia o servidor
 app.listen(PORT, () => {

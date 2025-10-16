@@ -1,0 +1,330 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Khora Mobile Back-end API",
+    "version": "1.0.0",
+    "description": "Documentação OpenAPI para a API Khora Mobile — endpoints de autenticação, perfil, diary, dashboard, analytics, checkups, conteúdo e chat."
+  },
+  "servers": [
+    { "url": "http://localhost:3000", "description": "Local" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" }
+        }
+      },
+      "PerfilUsuario": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "user_id": { "type": "string", "format": "uuid" },
+          "data_nascimento": { "type": "string", "format": "date" },
+          "altura_cm": { "type": "integer" },
+          "peso_kg": { "type": "number" },
+          "genero": { "type": "string" }
+        }
+      },
+      "DiaryEntry": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "user_id": { "type": "string" },
+          "texto": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "UserCheckup": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "user_id": { "type": "string", "format": "uuid" },
+          "nome": { "type": "string" },
+          "descricao": { "type": "string" },
+          "data_prevista": { "type": "string", "format": "date-time" },
+          "lembrete_ativo": { "type": "boolean" },
+          "criado_em": { "type": "string", "format": "date-time" }
+        }
+      },
+      "UserCheckupCreate": {
+        "type": "object",
+        "properties": {
+          "nome": { "type": "string" },
+          "descricao": { "type": "string" },
+          "data_prevista": { "type": "string", "format": "date-time" },
+          "lembrete_ativo": { "type": "boolean", "default": true }
+        },
+        "required": ["nome", "data_prevista"]
+      },
+      "ReminderSetting": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "user_id": { "type": "string", "format": "uuid" },
+          "enabled": { "type": "boolean" },
+          "frequency_days": { "type": "integer" },
+          "next_send": { "type": "string", "format": "date-time" },
+          "fcm_token": { "type": "string" }
+        }
+      },
+      "Conteudo": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "titulo": { "type": "string" },
+          "descricao_curta": { "type": "string" },
+          "conteudo_completo": { "type": "string" },
+          "url_externa": { "type": "string", "format": "uri" },
+          "thumbnail_url": { "type": "string", "format": "uri" },
+          "duracao_minutos": { "type": "integer" },
+          "nivel_dificuldade": { "type": "string" },
+          "autor": { "type": "string" },
+          "fonte_credivel": { "type": "string" },
+          "tipo_conteudo_id": { "type": "string" },
+          "categoria_id": { "type": "string" }
+        }
+      },
+      "ConteudoCreate": {
+        "type": "object",
+        "properties": {
+          "titulo": { "type": "string" },
+          "descricao_curta": { "type": "string" },
+          "conteudo_completo": { "type": "string" },
+          "url_externa": { "type": "string", "format": "uri" },
+          "thumbnail_url": { "type": "string", "format": "uri" },
+          "duracao_minutos": { "type": "integer" },
+          "nivel_dificuldade": { "type": "string" },
+          "autor": { "type": "string" },
+          "fonte_credivel": { "type": "string" },
+          "tipo_conteudo_id": { "type": "string" },
+          "categoria_id": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["titulo", "descricao_curta", "tipo_conteudo_id", "categoria_id"]
+      },
+      "Categoria": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "nome": { "type": "string" },
+          "descricao": { "type": "string" }
+        }
+      },
+      "DashboardResponse": {
+        "type": "object",
+        "properties": {
+          "usuario": { "$ref": "#/components/schemas/User" },
+          "indicadoresSaude": { "type": "object" },
+          "habitos": { "type": "object" },
+          "conquistas": { "type": "object" }
+        }
+      },
+      "AnalyticsResponse": {
+        "type": "object",
+        "properties": {
+          "periodo": { "type": "object" },
+          "analytics": { "type": "object" },
+          "insights": { "type": "array", "items": { "type": "object" } }
+        }
+      }
+    }
+  },
+  "security": [ { "bearerAuth": [] } ],
+  "paths": {
+
+      "/api/auth/login": {
+        "post": {
+          "summary": "Login",
+          "description": "Autentica usuário e retorna JWT",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "email": { "type": "string" },
+                    "password_hash": { "type": "string" }
+                  },
+                  "required": ["email", "password_hash"]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Login bem-sucedido",
+              "content": { "application/json": { "schema": { "type": "object", "properties": { "token": { "type": "string" } } } } }
+            },
+            "401": { "description": "Credenciais inválidas" }
+          }
+        }
+      },
+
+      "/api/profile": {
+        "get": {
+          "summary": "Lista Perfil",
+          "security": [{ "bearerAuth": [] }],
+          "responses": {
+            "200": { "description": "Perfil do usuário", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PerfilUsuario" } } } }
+          }
+        },
+        "post": {
+          "summary": "Salva Perfil",
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PerfilUsuario" } } } },
+          "responses": { "200": { "description": "Perfil salvo" } }
+        }
+      },
+
+      "/api/diary": {
+        "post": {
+          "summary": "Cria postagem no diário",
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DiaryEntry" } } } },
+          "responses": { "201": { "description": "Entry created" } }
+        },
+        "get": {
+          "summary": "Lista postagens do diário",
+          "security": [{ "bearerAuth": [] }],
+          "responses": { "200": { "description": "List of entries", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/DiaryEntry" } } } } } }
+        }
+      },
+
+      "/api/dashboard": {
+        "get": {
+          "summary": "Dashboard do usuário",
+          "security": [{ "bearerAuth": [] }],
+          "responses": { "200": { "description": "Dados agregados do dashboard", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DashboardResponse" } } } } }
+        }
+      },
+
+      "/api/analytics": {
+        "get": {
+          "summary": "Analytics histórico",
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            { "name": "periodo", "in": "query", "schema": { "type": "string", "default": "30" } },
+            { "name": "tipo", "in": "query", "schema": { "type": "string", "enum": ["all", "habitos", "conquistas", "engajamento", "saude"], "default": "all" } }
+          ],
+          "responses": { "200": { "description": "Analytics data", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AnalyticsResponse" } } } } }
+        }
+      },
+
+      "/api/insights": {
+        "get": {
+          "summary": "Insights proativos",
+          "security": [{ "bearerAuth": [] }],
+          "responses": { "200": { "description": "Lista de insights", "content": { "application/json": { "schema": { "type": "object" } } } } }
+        }
+      },
+        "/api/conteudo/categorias": {
+          "get": {
+            "summary": "Listar categorias de conteúdo",
+            "responses": { "200": { "description": "Lista de categorias", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Categoria" } } } } } }
+          }
+        },
+        "/api/conteudo/destaques": {
+          "get": {
+            "summary": "Listar conteúdos em destaque",
+            "responses": { "200": { "description": "Lista de destaques", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Conteudo" } } } } } }
+          }
+        },
+        "/api/conteudo/pesquisar": {
+          "get": {
+            "summary": "Pesquisar conteúdos",
+            "parameters": [ { "name": "q", "in": "query", "schema": { "type": "string" } }, { "name": "categoria", "in": "query", "schema": { "type": "string" } }, { "name": "tipo", "in": "query", "schema": { "type": "string" } }, { "name": "page", "in": "query", "schema": { "type": "integer" } }, { "name": "limit", "in": "query", "schema": { "type": "integer" } } ],
+            "responses": { "200": { "description": "Resultado da pesquisa", "content": { "application/json": { "schema": { "type": "object" } } } } }
+          }
+        },
+        "/api/conteudo/categoria/{categoriaId}": {
+          "get": {
+            "summary": "Listar conteúdos por categoria",
+            "parameters": [ { "name": "categoriaId", "in": "path", "required": true, "schema": { "type": "string" } }, { "name": "page", "in": "query", "schema": { "type": "integer" } }, { "name": "limit", "in": "query", "schema": { "type": "integer" } }, { "name": "tipo", "in": "query", "schema": { "type": "string" } }, { "name": "nivel", "in": "query", "schema": { "type": "string" } } ],
+            "responses": { "200": { "description": "Conteúdos por categoria", "content": { "application/json": { "schema": { "type": "object" } } } } }
+          }
+        },
+        "/api/conteudo/{id}": {
+          "get": {
+            "summary": "Buscar conteúdo por id",
+            "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+            "responses": { "200": { "description": "Conteúdo", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Conteudo" } } } }, "404": { "description": "Conteúdo não encontrado" } }
+          }
+        },
+        "/api/conteudo": {
+          "post": {
+            "summary": "Criar conteúdo",
+            "security": [{ "bearerAuth": [] }],
+            "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ConteudoCreate" } } } },
+            "responses": { "201": { "description": "Conteúdo criado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Conteudo" } } } } }
+          }
+        },
+
+      "/api/checkups/timeline": {
+        "get": {
+          "summary": "Linha do tempo de checkups",
+          "security": [{ "bearerAuth": [] }],
+          "responses": { "200": { "description": "Timeline com exames recomendados", "content": { "application/json": { "schema": { "type": "object" } } } } }
+        }
+      },
+
+      "/api/checkups/reminder": {
+        "post": {
+          "summary": "Criar/Atualizar lembrete",
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": { "required": false, "content": { "application/json": { "schema": { "type": "object", "properties": { "enabled": { "type": "boolean" }, "frequency_days": { "type": "integer" }, "fcm_token": { "type": "string" } } } } } },
+          "responses": { "200": { "description": "Reminder saved", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReminderSetting" } } } } }
+        }
+      },
+
+      "/api/checkups": {
+        "get": {
+          "summary": "Lista checkups do usuário",
+          "security": [{ "bearerAuth": [] }],
+          "responses": { "200": { "description": "Lista de checkups do usuário", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/UserCheckup" } } } } } }
+        },
+        "post": {
+          "summary": "Cria um checkup",
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserCheckupCreate" } } } },
+          "responses": { "201": { "description": "Checkup created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserCheckup" } } } } }
+        }
+      },
+
+      "/api/checkups/{id}": {
+        "put": {
+          "summary": "Edita checkup do usuário",
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+          "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserCheckupCreate" } } } },
+          "responses": { "200": { "description": "Checkup updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserCheckup" } } } } }
+        },
+        "delete": {
+          "summary": "Delete checkup",
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+          "responses": { "200": { "description": "Checkup deleted" } }
+        }
+      },
+      "/api/chat": {
+        "post": {
+          "summary": "Enviar mensagem ao chatbot",
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" } }, "required": ["message"] } } } },
+          "responses": { "200": { "description": "Resposta do chatbot" } }
+        }
+      }
+
+  }
+}
