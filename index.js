@@ -4,6 +4,7 @@ import authRoutes from './src/routes/authRoutes.js';
 import protectedRoutes from './src/routes/protectedRoutes.js';
 import chatRoutes from './src/routes/chatRoutes.js';
 import contents from './src/routes/contentsRoutes.js';
+import reliefRoutes from './src/routes/reliefRoutes.js';
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
@@ -14,6 +15,9 @@ const app = express();
 const PORT = process.env.PORT;
 
 app.use(express.json());
+
+// Servir assets públicos (áudios, imagens, etc.)
+app.use('/assets', express.static(path.resolve('src/public')));
 
 // Rota de teste
 app.get('/', (req, res) => {
@@ -30,6 +34,9 @@ app.use('/api', protectedRoutes, chatRoutes);
 
 //Rota para conteúdo
 app.use('/api/conteudo', contents);
+
+// Rotas públicas para ferramentas de alívio de estresse (áudios + exercícios)
+app.use('/api/relief', reliefRoutes);
 
 // Swagger UI
 try {

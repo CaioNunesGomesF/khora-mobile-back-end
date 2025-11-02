@@ -65,6 +65,7 @@ model user {
   avaliacoes       avaliacao_conteudo[]
   reminder_setting reminder_setting?
   user_checkup     user_checkup[]
+ 
 }
 
 model user_conquista {
@@ -189,4 +190,62 @@ model user_checkup {
   criado_em      DateTime @default(now()) @db.Timestamp(6)
 
   user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+// Modelos para o sistema de fóruns anônimos
+model forum_topico {
+  id          String       @id @default(uuid()) @db.Uuid
+  titulo      String       @db.VarChar(200)
+  descricao   String?      @db.Text
+  created_by  String       @db.Uuid
+  created_at  DateTime     @default(now()) @db.Timestamp(6)
+
+  posts       forum_post[]
+  pseudonimos forum_pseudonimo[]
+
+  // relação com usuário criador (armazenamos, mas NÃO exporemos o id nas respostas da API)
+  user user @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model forum_post {
+  id         String           @id @default(uuid()) @db.Uuid
+  topico_id  String           @db.Uuid
+  user_id    String           @db.Uuid
+  conteudo   String           @db.Text
+  is_removed Boolean          @default(false)
+  removed_at DateTime?
+  removed_by String?          @db.Uuid
+  created_at DateTime         @default(now()) @db.Timestamp(6)
+
+  topico   forum_topico @relation(fields: [topico_id], references: [id], onDelete: Cascade)
+  user     user         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  respostas forum_resposta[]
+}
+
+model forum_resposta {
+  id         String   @id @default(uuid()) @db.Uuid
+  post_id    String   @db.Uuid
+  user_id    String   @db.Uuid
+  conteudo   String   @db.Text
+  is_removed Boolean  @default(false)
+  removed_at DateTime?
+  removed_by String?  @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  post forum_post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  user user       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+// Associação para pseudônimos por usuário por tópico
+model forum_pseudonimo {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @db.Uuid
+  topico_id  String   @db.Uuid
+  pseudonimo String   @db.VarChar(100)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  user   user        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  topico forum_topico @relation(fields: [topico_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, topico_id], map: "forum_pseudonimo_user_topico_idx")
 }

@@ -5,6 +5,7 @@ import * as diaryController from '../controllers/diaryController.js';
 import * as dashboardController from '../controllers/dashboardController.js';
 import * as analyticsController from '../controllers/analyticsController.js';
 import * as checkupsController from '../controllers/checkupsController.js';
+import symptomRoutes from './symptomRoutes.js';
 
 
 const router = express.Router();
@@ -50,5 +51,11 @@ router.get('/checkups', authMiddleware, checkupsController.listUserCheckups);
 router.post('/checkups', authMiddleware, checkupsController.createUserCheckup);
 router.put('/checkups/:id', authMiddleware, checkupsController.updateUserCheckup);
 router.delete('/checkups/:id', authMiddleware, checkupsController.deleteUserCheckup);
+
+// Rotas para triagem de sintomas (assessments)
+// POST /symptoms/assess
+router.use('/symptoms', authMiddleware, symptomRoutes);
+
+// Rotas para fóruns (anônimos por tópico). (Removidas temporariamente)
 
 export default router;
