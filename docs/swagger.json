@@ -142,6 +142,440 @@
   },
   "security": [ { "bearerAuth": [] } ],
   "paths": {
+    "/api/user/health-score": {
+      "get": {
+        "summary": "Pontuação de saúde dinâmica do usuário",
+        "description": "Retorna o Health Score diário do usuário, calculado com base em exercícios, sono, meditação e humor.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Pontuação de saúde atual do usuário",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "score": { "type": "integer", "description": "Pontuação de saúde (0-100)" },
+                    "details": {
+                      "type": "object",
+                      "properties": {
+                        "exerciseMinutes": { "type": "integer" },
+                        "sleepHours": { "type": "number" },
+                        "meditationMinutes": { "type": "integer" },
+                        "mood": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Não autenticado" },
+          "500": { "description": "Erro ao calcular Health Score" }
+        }
+      }
+    },
+    "/api/relief/breathing": {
+      "get": {
+        "summary": "Listar exercícios de respiração guiada",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Lista de exercícios de respiração",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "integer" }, "name": { "type": "string" }, "duration": { "type": "integer" }, "steps": { "type": "string" } } } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/relief/breathing/{id}": {
+      "get": {
+        "summary": "Detalhes de exercício de respiração guiada",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } } ],
+        "responses": {
+          "200": { "description": "Exercício encontrado" },
+          "404": { "description": "Exercício não encontrado" }
+        }
+      }
+    },
+    "/api/relief/audio": {
+      "get": {
+        "summary": "Listar áudios relaxantes e meditações",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Lista de áudios relaxantes",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "integer" }, "title": { "type": "string" }, "fileUrl": { "type": "string" }, "description": { "type": "string" }, "duration": { "type": "integer" } } } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/relief/audio/{id}": {
+      "get": {
+        "summary": "Detalhes de áudio relaxante ou meditação",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } } ],
+        "responses": {
+          "200": { "description": "Áudio encontrado" },
+          "404": { "description": "Áudio não encontrado" }
+        }
+      }
+    },
+    "/api/relief/audio/file/{filename}": {
+      "get": {
+        "summary": "Servir arquivo de áudio relaxante",
+        "parameters": [ { "name": "filename", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "Arquivo de áudio" },
+          "404": { "description": "Arquivo não encontrado" }
+        }
+      }
+    },
+    "/api/mood": {
+      "post": {
+        "summary": "Registrar humor diário do usuário (manual ou facial)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "mood": { "type": "string" },
+                  "origin": { "type": "string", "enum": ["manual", "facial"] }
+                },
+                "required": ["mood", "origin"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Registro de humor salvo" },
+          "400": { "description": "Erro ao salvar" }
+        }
+      },
+      "get": {
+        "summary": "Listar registros de humor do usuário",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Lista de registros de humor",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "integer" }, "mood": { "type": "string" }, "origin": { "type": "string" }, "createdAt": { "type": "string", "format": "date-time" } } } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/topics": {
+      "post": {
+        "summary": "Criar novo tópico no fórum",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" }
+                },
+                "required": ["title"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Tópico criado" },
+          "400": { "description": "Erro na criação" }
+        }
+      },
+      "get": {
+        "summary": "Listar tópicos do fórum",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Lista de tópicos",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "integer" }, "title": { "type": "string" } } } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/pseudonym": {
+      "post": {
+        "summary": "Criar pseudônimo anônimo para usuário em um tópico",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "topicId": { "type": "integer" }
+                },
+                "required": ["topicId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Pseudônimo criado" },
+          "400": { "description": "Erro na criação" }
+        }
+      }
+    },
+    "/api/forum/posts": {
+      "post": {
+        "summary": "Criar post anônimo em tópico",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "topicId": { "type": "integer" },
+                  "pseudonymId": { "type": "integer" },
+                  "content": { "type": "string" }
+                },
+                "required": ["topicId", "pseudonymId", "content"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Post criado" },
+          "400": { "description": "Erro na criação" }
+        }
+      }
+    },
+    "/api/forum/topics/{topicId}/posts": {
+      "get": {
+        "summary": "Listar posts de um tópico do fórum",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "topicId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de posts do tópico",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "type": "object" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/replies": {
+      "post": {
+        "summary": "Criar resposta anônima em post",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "postId": { "type": "integer" },
+                  "pseudonymId": { "type": "integer" },
+                  "content": { "type": "string" }
+                },
+                "required": ["postId", "pseudonymId", "content"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Resposta criada" },
+          "400": { "description": "Erro na criação" }
+        }
+      }
+    },
+    "/api/forum/posts/{postId}": {
+      "delete": {
+        "summary": "Deletar post do fórum (moderação)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "postId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Post deletado" },
+          "400": { "description": "Erro ao deletar" }
+        }
+      }
+    },
+    "/api/quiz": {
+      "get": {
+        "summary": "Listar perguntas do quiz Mito ou Verdade?",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Lista de perguntas do quiz",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "text": { "type": "string" },
+                      "options": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "integer" },
+                            "text": { "type": "string" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quiz/answer": {
+      "post": {
+        "summary": "Validar resposta do quiz Mito ou Verdade?",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "questionId": { "type": "integer" },
+                  "optionId": { "type": "integer" }
+                },
+                "required": ["questionId", "optionId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resultado da validação da resposta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "correct": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "Alternativa não encontrada" }
+        }
+      }
+    },
+    "/api/teams": {
+      "post": {
+        "summary": "Criar grupo",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Grupo criado" },
+          "400": { "description": "Erro na criação" }
+        }
+      }
+    },
+    "/api/teams/invite": {
+      "post": {
+        "summary": "Convidar usuário para grupo",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "teamId": { "type": "integer" },
+                  "userId": { "type": "integer" }
+                },
+                "required": ["teamId", "userId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Usuário convidado" },
+          "400": { "description": "Usuário já é membro ou erro" }
+        }
+      }
+    },
+    "/api/teams/{teamId}/challenges": {
+      "post": {
+        "summary": "Criar desafio no grupo",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "startDate": { "type": "string", "format": "date-time" },
+                  "endDate": { "type": "string", "format": "date-time" }
+                },
+                "required": ["title", "startDate", "endDate"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Desafio criado" },
+          "400": { "description": "Erro na criação" }
+        }
+      }
+    },
 
       "/api/auth/login": {
         "post": {

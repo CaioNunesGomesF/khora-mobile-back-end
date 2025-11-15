@@ -5,6 +5,7 @@ import * as diaryController from '../controllers/diaryController.js';
 import * as dashboardController from '../controllers/dashboardController.js';
 import * as analyticsController from '../controllers/analyticsController.js';
 import * as checkupsController from '../controllers/checkupsController.js';
+import { getUserHealthScore } from '../controllers/healthScoreController.js';
 import symptomRoutes from './symptomRoutes.js';
 
 
@@ -39,6 +40,9 @@ router.get('/analytics', authMiddleware, analyticsController.getAnalytics);
 
 //rota para buscar insights específicos
 router.get('/insights', authMiddleware, analyticsController.getInsights);
+
+// Health Score Dinâmico
+router.get('/user/health-score', authMiddleware, getUserHealthScore);
 
 // Checkups: timeline e lembretes
 router.get('/checkups/timeline', authMiddleware, checkupsController.getTimeline);

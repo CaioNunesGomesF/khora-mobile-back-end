@@ -65,7 +65,94 @@ model user {
   avaliacoes       avaliacao_conteudo[]
   reminder_setting reminder_setting?
   user_checkup     user_checkup[]
- 
+  forum_topicos    forum_topico[]
+  forum_posts      forum_post[]
+  forum_respostas  forum_resposta[]
+  forum_pseudonimos forum_pseudonimo[]
+  }
+  model MoodEntry {
+    id        Int      @id @default(autoincrement())
+    userId    String   @db.Uuid
+    mood      String
+    origin    String   // manual ou facial
+    createdAt DateTime @default(now())
+  }
+
+  model ForumTopic {
+    id        Int           @id @default(autoincrement())
+    title     String
+    createdAt DateTime      @default(now())
+    posts     ForumPost[]
+    pseudonyms ForumPseudonym[]
+  }
+
+  model ForumPost {
+    id           Int           @id @default(autoincrement())
+    topicId      Int
+    pseudonymId  Int
+    content      String
+    createdAt    DateTime      @default(now())
+    topic        ForumTopic    @relation(fields: [topicId], references: [id])
+    pseudonym    ForumPseudonym @relation(fields: [pseudonymId], references: [id])
+    replies      ForumReply[]
+  }
+
+  model ForumReply {
+    id           Int           @id @default(autoincrement())
+    postId       Int
+    pseudonymId  Int
+    content      String
+    createdAt    DateTime      @default(now())
+    post         ForumPost     @relation(fields: [postId], references: [id])
+    pseudonym    ForumPseudonym @relation(fields: [pseudonymId], references: [id])
+  }
+
+  model ForumPseudonym {
+    id         Int      @id @default(autoincrement())
+    topicId    Int
+    userId     String   @db.Uuid
+    name       String
+    createdAt  DateTime @default(now())
+    topic      ForumTopic @relation(fields: [topicId], references: [id])
+    posts      ForumPost[]
+    replies    ForumReply[]
+  }
+
+model Team {
+  id           Int           @id @default(autoincrement())
+  name         String
+  description  String?
+  createdAt    DateTime      @default(now())
+  ownerId      Int
+  members      TeamMember[]
+  challenges   Challenge[]
+}
+
+model TeamMember {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  teamId    Int
+  joinedAt  DateTime @default(now())
+  team      Team     @relation(fields: [teamId], references: [id])
+}
+
+model Challenge {
+  id           Int           @id @default(autoincrement())
+  title        String
+  description  String?
+  startDate    DateTime
+  endDate      DateTime
+  teamId       Int
+  team         Team          @relation(fields: [teamId], references: [id])
+  participants ChallengeParticipant[]
+}
+
+model ChallengeParticipant {
+  id          Int      @id @default(autoincrement())
+  challengeId Int
+  userId      Int
+  progress    Int      @default(0)
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
 }
 
 model user_conquista {
@@ -79,6 +166,19 @@ model user_conquista {
   @@unique([user_id, conquista_id], map: "user_conquista_user_id_conquista_id_idx")
 }
 
+  model QuizQuestion {
+    id        Int          @id @default(autoincrement())
+    text      String
+    options   QuizOption[]
+  }
+
+  model QuizOption {
+    id           Int          @id @default(autoincrement())
+    text         String
+    isCorrect    Boolean      @default(false)
+    questionId   Int
+    question     QuizQuestion @relation(fields: [questionId], references: [id])
+  }
 model user_doenca {
   user_id   String @db.Uuid
   doenca_id String @db.Uuid
@@ -191,6 +291,22 @@ model user_checkup {
 
   user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
+
+model BreathingExercise {
+  id        Int      @id @default(autoincrement())
+  name      String
+  duration  Int      // minutos
+  steps     String   // receita ou instruções
+}
+
+model RelaxingAudio {
+  id        Int      @id @default(autoincrement())
+  title     String
+  fileUrl   String
+  description String?
+  duration  Int      // segundos
+}
+
 
 // Modelos para o sistema de fóruns anônimos
 model forum_topico {

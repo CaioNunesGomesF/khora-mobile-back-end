@@ -1,3 +1,42 @@
+import path from 'path';
+// ...existing code...
+// Detalhes de exercício de respiração
+export async function getBreathing(req, res) {
+  try {
+    const { id } = req.params;
+    const exercise = await ReliefService.getBreathingById(Number(id));
+    if (!exercise) return res.status(404).json({ error: 'Exercício não encontrado' });
+    return res.json(exercise);
+  } catch (err) {
+    console.error('Erro getBreathing:', err);
+    return res.status(500).json({ error: 'Erro ao obter exercício' });
+  }
+}
+
+// Detalhes de áudio relaxante
+export async function getAudio(req, res) {
+  try {
+    const { id } = req.params;
+    const audio = await ReliefService.getAudioById(Number(id));
+    if (!audio) return res.status(404).json({ error: 'Áudio não encontrado' });
+    return res.json(audio);
+  } catch (err) {
+    console.error('Erro getAudio:', err);
+    return res.status(500).json({ error: 'Erro ao obter áudio' });
+  }
+}
+
+// Servir arquivo de áudio
+export async function serveAudioFile(req, res) {
+  try {
+    const { filename } = req.params;
+    const filePath = path.resolve('src/public/audio', filename);
+    return res.sendFile(filePath);
+  } catch (err) {
+    console.error('Erro serveAudioFile:', err);
+    return res.status(404).json({ error: 'Arquivo não encontrado' });
+  }
+}
 import * as ReliefService from '../service/relief_service.js';
 
 /**

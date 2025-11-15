@@ -1,3 +1,5 @@
+import forumRoutes from './src/routes/forumRoutes.js';
+import moodRoutes from './src/routes/moodRoutes.js';
 import express from 'express';
 import 'dotenv/config';
 import authRoutes from './src/routes/authRoutes.js';
@@ -5,6 +7,7 @@ import protectedRoutes from './src/routes/protectedRoutes.js';
 import chatRoutes from './src/routes/chatRoutes.js';
 import contents from './src/routes/contentsRoutes.js';
 import reliefRoutes from './src/routes/reliefRoutes.js';
+import teamRoutes from './src/routes/teamRoutes.js';
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
@@ -37,6 +40,11 @@ app.use('/api/conteudo', contents);
 
 // Rotas públicas para ferramentas de alívio de estresse (áudios + exercícios)
 app.use('/api/relief', reliefRoutes);
+// Rotas do quiz "Mito ou Verdade?"
+import quizRoutes from './src/routes/quizRoutes.js';
+app.use('/api', quizRoutes);
+// Rotas de grupos e desafios
+app.use('/api/teams', teamRoutes);
 
 // Swagger UI
 try {
