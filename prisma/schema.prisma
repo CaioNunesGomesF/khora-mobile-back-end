@@ -58,6 +58,7 @@ model user {
   email            String               @unique @db.VarChar
   password_hash    String               @db.VarChar
   created_at       DateTime             @default(now()) @db.Timestamp(6)
+  isFirstLogin     Boolean              @default(true)
   perfil_usuario   perfil_usuario?
   progresso_habito progresso_habito[]
   user_conquista   user_conquista[]
@@ -69,6 +70,7 @@ model user {
   forum_posts      forum_post[]
   forum_respostas  forum_resposta[]
   forum_pseudonimos forum_pseudonimo[]
+  two_factor_codes two_factor_code[]
   }
   model MoodEntry {
     id        Int      @id @default(autoincrement())
@@ -364,4 +366,16 @@ model forum_pseudonimo {
   topico forum_topico @relation(fields: [topico_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, topico_id], map: "forum_pseudonimo_user_topico_idx")
+}
+
+// Modelo para armazenar códigos de autenticação de dois fatores
+model two_factor_code {
+  id        String   @id @default(uuid()) @db.Uuid
+  user_id   String   @db.Uuid
+  code      String   @db.VarChar(6)
+  expiresAt DateTime
+  isUsed    Boolean  @default(false)
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+
+  user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
