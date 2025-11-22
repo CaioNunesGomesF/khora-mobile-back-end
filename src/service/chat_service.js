@@ -1,7 +1,9 @@
 import { GoogleGenAI } from '@google/genai';
 import 'dotenv/config';
 
-const ai = new GoogleGenAI({});
+// Initialize the GenAI client with an API key from environment variable GEMINI_API
+// If you prefer ADC (service account JSON), set GOOGLE_APPLICATION_CREDENTIALS accordingly
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API });
 
 const userChat = new Map();
 let chat = [];
@@ -19,6 +21,9 @@ export const clearChatHistory = () => {
 }
 
 export const startConversation = (user) => {
+  if (!user || !user.id) {
+    throw new Error('startConversation requires a user object with `id` and `name`.');
+  }
   const chat = [{
     role: 'chat',
     contents: `Você é um assistente de saúde masculina. 
@@ -48,11 +53,13 @@ export const continueConversation = async (user, message) => {
             contents: chat.map(msg => `${msg.role}: ${msg.contents}`).join('\n') + `\n${user.name}: ${message}`,
         });
 
-        chat.push({ role: 'user', contents: message });
-        chat.push({ role: 'chat', contents: response });
-        userChat.set(user.id, chat);
-        console.log('Chat History:', chat);
-        return response.text;
+    const textResponse = response?.text ?? response?.candidates?.[0]?.content?.text ?? JSON.stringify(response);
+
+    chat.push({ role: 'user', contents: message });
+    chat.push({ role: 'chat', contents: textResponse });
+    userChat.set(user.id, chat);
+    console.log('Chat History:', chat);
+    return textResponse;
 
 } catch (error) {
         console.error('Erro ao continuar a conversa com o Gemini:', error);

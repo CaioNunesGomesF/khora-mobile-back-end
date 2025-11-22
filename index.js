@@ -12,10 +12,11 @@ import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
 
+
 const app = express();
 
 // Define a porta do servidor
-const PORT = process.env.PORT;
+const PORT = process.env.PORT 
 
 app.use(express.json());
 
