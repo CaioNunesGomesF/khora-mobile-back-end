@@ -1,5 +1,6 @@
 import forumRoutes from './src/routes/forumRoutes.js';
 import moodRoutes from './src/routes/moodRoutes.js';
+import saudeMasculinaRoutes from './src/routes/saudeMasculinaRoutes.js';
 import express from 'express';
 import 'dotenv/config';
 import authRoutes from './src/routes/authRoutes.js';
@@ -38,6 +39,9 @@ app.use('/api', protectedRoutes, chatRoutes);
 
 //Rota para conteúdo
 app.use('/api/conteudo', contents);
+
+// Rota para arsenal de conhecimento e pílula de conhecimento - saúde masculina
+app.use('/api', saudeMasculinaRoutes);
 
 // Rotas públicas para ferramentas de alívio de estresse (áudios + exercícios)
 app.use('/api/relief', reliefRoutes);
