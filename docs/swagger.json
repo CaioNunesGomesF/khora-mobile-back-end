@@ -3,10 +3,25 @@
   "info": {
     "title": "Khora Mobile Back-end API",
     "version": "1.0.0",
-    "description": "Documentação OpenAPI para a API Khora Mobile — endpoints de autenticação, perfil, diary, dashboard, analytics, checkups, conteúdo e chat."
+    "description": "Documentação OpenAPI para a API Khora Mobile — endpoints organizados por domínios funcionais."
   },
   "servers": [
-    { "url": "http://localhost:3000", "description": "Local" }
+    {
+      "url": "http://localhost:3000",
+      "description": "Local"
+    }
+  ],
+  "tags": [
+    { "name": "Autenticação", "description": "Login e segurança" },
+    { "name": "Perfil & Usuário", "description": "Dados do usuário e pontuação de saúde" },
+    { "name": "Saúde Mental & Bem-estar", "description": "Exercícios de respiração, áudios e registro de humor" },
+    { "name": "Diário", "description": "Registro pessoal diário" },
+    { "name": "Dashboard & Analytics", "description": "Visão geral, métricas e insights" },
+    { "name": "Checkups", "description": "Gerenciamento de exames e lembretes médicos" },
+    { "name": "Conteúdo", "description": "Materiais educativos e feed" },
+    { "name": "Comunidade & Social", "description": "Fórum anônimo e grupos" },
+    { "name": "Gamificação", "description": "Quizzes e desafios" },
+    { "name": "Chatbot", "description": "Assistente virtual de saúde" }
   ],
   "components": {
     "securitySchemes": {
@@ -65,7 +80,10 @@
           "data_prevista": { "type": "string", "format": "date-time" },
           "lembrete_ativo": { "type": "boolean", "default": true }
         },
-        "required": ["nome", "data_prevista"]
+        "required": [
+          "nome",
+          "data_prevista"
+        ]
       },
       "ReminderSetting": {
         "type": "object",
@@ -111,7 +129,12 @@
           "categoria_id": { "type": "string" },
           "tags": { "type": "array", "items": { "type": "string" } }
         },
-        "required": ["titulo", "descricao_curta", "tipo_conteudo_id", "categoria_id"]
+        "required": [
+          "titulo",
+          "descricao_curta",
+          "tipo_conteudo_id",
+          "categoria_id"
+        ]
       },
       "Categoria": {
         "type": "object",
@@ -140,10 +163,78 @@
       }
     }
   },
-  "security": [ { "bearerAuth": [] } ],
+  "security": [
+    { "bearerAuth": [] }
+  ],
   "paths": {
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Autenticação"],
+        "summary": "Login",
+        "description": "Autentica usuário e retorna JWT",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "password_hash": { "type": "string" }
+                },
+                "required": ["email", "password_hash"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login bem-sucedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "token": { "type": "string" } }
+                }
+              }
+            }
+          },
+          "401": { "description": "Credenciais inválidas" }
+        }
+      }
+    },
+    "/api/profile": {
+      "get": {
+        "tags": ["Perfil & Usuário"],
+        "summary": "Lista Perfil",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Perfil do usuário",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/PerfilUsuario" } }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Perfil & Usuário"],
+        "summary": "Salva Perfil",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/PerfilUsuario" } }
+          }
+        },
+        "responses": {
+          "200": { "description": "Perfil salvo" }
+        }
+      }
+    },
     "/api/user/health-score": {
       "get": {
+        "tags": ["Perfil & Usuário"],
         "summary": "Pontuação de saúde dinâmica do usuário",
         "description": "Retorna o Health Score diário do usuário, calculado com base em exercícios, sono, meditação e humor.",
         "security": [{ "bearerAuth": [] }],
@@ -177,6 +268,7 @@
     },
     "/api/relief/breathing": {
       "get": {
+        "tags": ["Saúde Mental & Bem-estar"],
         "summary": "Listar exercícios de respiração guiada",
         "security": [{ "bearerAuth": [] }],
         "responses": {
@@ -184,7 +276,18 @@
             "description": "Lista de exercícios de respiração",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "integer" }, "name": { "type": "string" }, "duration": { "type": "integer" }, "steps": { "type": "string" } } } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "name": { "type": "string" },
+                      "duration": { "type": "integer" },
+                      "steps": { "type": "string" }
+                    }
+                  }
+                }
               }
             }
           }
@@ -193,9 +296,12 @@
     },
     "/api/relief/breathing/{id}": {
       "get": {
+        "tags": ["Saúde Mental & Bem-estar"],
         "summary": "Detalhes de exercício de respiração guiada",
         "security": [{ "bearerAuth": [] }],
-        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } } ],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
         "responses": {
           "200": { "description": "Exercício encontrado" },
           "404": { "description": "Exercício não encontrado" }
@@ -204,6 +310,7 @@
     },
     "/api/relief/audio": {
       "get": {
+        "tags": ["Saúde Mental & Bem-estar"],
         "summary": "Listar áudios relaxantes e meditações",
         "security": [{ "bearerAuth": [] }],
         "responses": {
@@ -211,7 +318,19 @@
             "description": "Lista de áudios relaxantes",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "integer" }, "title": { "type": "string" }, "fileUrl": { "type": "string" }, "description": { "type": "string" }, "duration": { "type": "integer" } } } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "title": { "type": "string" },
+                      "fileUrl": { "type": "string" },
+                      "description": { "type": "string" },
+                      "duration": { "type": "integer" }
+                    }
+                  }
+                }
               }
             }
           }
@@ -220,9 +339,12 @@
     },
     "/api/relief/audio/{id}": {
       "get": {
+        "tags": ["Saúde Mental & Bem-estar"],
         "summary": "Detalhes de áudio relaxante ou meditação",
         "security": [{ "bearerAuth": [] }],
-        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } } ],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
         "responses": {
           "200": { "description": "Áudio encontrado" },
           "404": { "description": "Áudio não encontrado" }
@@ -231,8 +353,11 @@
     },
     "/api/relief/audio/file/{filename}": {
       "get": {
+        "tags": ["Saúde Mental & Bem-estar"],
         "summary": "Servir arquivo de áudio relaxante",
-        "parameters": [ { "name": "filename", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "parameters": [
+          { "name": "filename", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
         "responses": {
           "200": { "description": "Arquivo de áudio" },
           "404": { "description": "Arquivo não encontrado" }
@@ -241,6 +366,7 @@
     },
     "/api/mood": {
       "post": {
+        "tags": ["Saúde Mental & Bem-estar"],
         "summary": "Registrar humor diário do usuário (manual ou facial)",
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
@@ -264,6 +390,7 @@
         }
       },
       "get": {
+        "tags": ["Saúde Mental & Bem-estar"],
         "summary": "Listar registros de humor do usuário",
         "security": [{ "bearerAuth": [] }],
         "responses": {
@@ -271,8 +398,340 @@
             "description": "Lista de registros de humor",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "integer" }, "mood": { "type": "string" }, "origin": { "type": "string" }, "createdAt": { "type": "string", "format": "date-time" } } } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "mood": { "type": "string" },
+                      "origin": { "type": "string" },
+                      "createdAt": { "type": "string", "format": "date-time" }
+                    }
+                  }
+                }
               }
+            }
+          }
+        }
+      }
+    },
+    "/api/diary": {
+      "post": {
+        "tags": ["Diário"],
+        "summary": "Cria postagem no diário",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/DiaryEntry" } }
+          }
+        },
+        "responses": {
+          "201": { "description": "Entry created" }
+        }
+      },
+      "get": {
+        "tags": ["Diário"],
+        "summary": "Lista postagens do diário",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of entries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/DiaryEntry" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard": {
+      "get": {
+        "tags": ["Dashboard & Analytics"],
+        "summary": "Dashboard do usuário",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Dados agregados do dashboard",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/DashboardResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/analytics": {
+      "get": {
+        "tags": ["Dashboard & Analytics"],
+        "summary": "Analytics histórico",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "periodo", "in": "query", "schema": { "type": "string", "default": "30" } },
+          { "name": "tipo", "in": "query", "schema": { "type": "string", "enum": ["all", "habitos", "conquistas", "engajamento", "saude"], "default": "all" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analytics data",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/AnalyticsResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/insights": {
+      "get": {
+        "tags": ["Dashboard & Analytics"],
+        "summary": "Insights proativos",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Lista de insights",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/checkups": {
+      "get": {
+        "tags": ["Checkups"],
+        "summary": "Lista checkups do usuário",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Lista de checkups do usuário",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/UserCheckup" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Checkups"],
+        "summary": "Cria um checkup",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UserCheckupCreate" } }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Checkup created",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/UserCheckup" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/checkups/{id}": {
+      "put": {
+        "tags": ["Checkups"],
+        "summary": "Edita checkup do usuário",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UserCheckupCreate" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Checkup updated",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/UserCheckup" } }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Checkups"],
+        "summary": "Delete checkup",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Checkup deleted" }
+        }
+      }
+    },
+    "/api/checkups/timeline": {
+      "get": {
+        "tags": ["Checkups"],
+        "summary": "Linha do tempo de checkups",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Timeline com exames recomendados",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/checkups/reminder": {
+      "post": {
+        "tags": ["Checkups"],
+        "summary": "Criar/Atualizar lembrete",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "enabled": { "type": "boolean" },
+                  "frequency_days": { "type": "integer" },
+                  "fcm_token": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reminder saved",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/ReminderSetting" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/conteudo/categorias": {
+      "get": {
+        "tags": ["Conteúdo"],
+        "summary": "Listar categorias de conteúdo",
+        "responses": {
+          "200": {
+            "description": "Lista de categorias",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Categoria" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/conteudo/destaques": {
+      "get": {
+        "tags": ["Conteúdo"],
+        "summary": "Listar conteúdos em destaque",
+        "responses": {
+          "200": {
+            "description": "Lista de destaques",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Conteudo" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/conteudo/pesquisar": {
+      "get": {
+        "tags": ["Conteúdo"],
+        "summary": "Pesquisar conteúdos",
+        "parameters": [
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          { "name": "categoria", "in": "query", "schema": { "type": "string" } },
+          { "name": "tipo", "in": "query", "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado da pesquisa",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/conteudo/categoria/{categoriaId}": {
+      "get": {
+        "tags": ["Conteúdo"],
+        "summary": "Listar conteúdos por categoria",
+        "parameters": [
+          { "name": "categoriaId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer" } },
+          { "name": "tipo", "in": "query", "schema": { "type": "string" } },
+          { "name": "nivel", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conteúdos por categoria",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/conteudo/{id}": {
+      "get": {
+        "tags": ["Conteúdo"],
+        "summary": "Buscar conteúdo por id",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conteúdo",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Conteudo" } }
+            }
+          },
+          "404": { "description": "Conteúdo não encontrado" }
+        }
+      }
+    },
+    "/api/conteudo": {
+      "post": {
+        "tags": ["Conteúdo"],
+        "summary": "Criar conteúdo",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/ConteudoCreate" } }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Conteúdo criado",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Conteudo" } }
             }
           }
         }
@@ -280,6 +739,7 @@
     },
     "/api/forum/topics": {
       "post": {
+        "tags": ["Comunidade & Social"],
         "summary": "Criar novo tópico no fórum",
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
@@ -288,9 +748,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {
-                  "title": { "type": "string" }
-                },
+                "properties": { "title": { "type": "string" } },
                 "required": ["title"]
               }
             }
@@ -302,6 +760,7 @@
         }
       },
       "get": {
+        "tags": ["Comunidade & Social"],
         "summary": "Listar tópicos do fórum",
         "security": [{ "bearerAuth": [] }],
         "responses": {
@@ -309,7 +768,16 @@
             "description": "Lista de tópicos",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "integer" }, "title": { "type": "string" } } } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "title": { "type": "string" }
+                    }
+                  }
+                }
               }
             }
           }
@@ -318,6 +786,7 @@
     },
     "/api/forum/pseudonym": {
       "post": {
+        "tags": ["Comunidade & Social"],
         "summary": "Criar pseudônimo anônimo para usuário em um tópico",
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
@@ -326,9 +795,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {
-                  "topicId": { "type": "integer" }
-                },
+                "properties": { "topicId": { "type": "integer" } },
                 "required": ["topicId"]
               }
             }
@@ -342,6 +809,7 @@
     },
     "/api/forum/posts": {
       "post": {
+        "tags": ["Comunidade & Social"],
         "summary": "Criar post anônimo em tópico",
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
@@ -368,6 +836,7 @@
     },
     "/api/forum/topics/{topicId}/posts": {
       "get": {
+        "tags": ["Comunidade & Social"],
         "summary": "Listar posts de um tópico do fórum",
         "security": [{ "bearerAuth": [] }],
         "parameters": [
@@ -377,9 +846,7 @@
           "200": {
             "description": "Lista de posts do tópico",
             "content": {
-              "application/json": {
-                "schema": { "type": "array", "items": { "type": "object" } }
-              }
+              "application/json": { "schema": { "type": "array", "items": { "type": "object" } } }
             }
           }
         }
@@ -387,6 +854,7 @@
     },
     "/api/forum/replies": {
       "post": {
+        "tags": ["Comunidade & Social"],
         "summary": "Criar resposta anônima em post",
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
@@ -413,6 +881,7 @@
     },
     "/api/forum/posts/{postId}": {
       "delete": {
+        "tags": ["Comunidade & Social"],
         "summary": "Deletar post do fórum (moderação)",
         "security": [{ "bearerAuth": [] }],
         "parameters": [
@@ -424,8 +893,92 @@
         }
       }
     },
+    "/api/teams": {
+      "post": {
+        "tags": ["Comunidade & Social"],
+        "summary": "Criar grupo",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Grupo criado" },
+          "400": { "description": "Erro na criação" }
+        }
+      }
+    },
+    "/api/teams/invite": {
+      "post": {
+        "tags": ["Comunidade & Social"],
+        "summary": "Convidar usuário para grupo",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "teamId": { "type": "integer" },
+                  "userId": { "type": "integer" }
+                },
+                "required": ["teamId", "userId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Usuário convidado" },
+          "400": { "description": "Usuário já é membro ou erro" }
+        }
+      }
+    },
+    "/api/teams/{teamId}/challenges": {
+      "post": {
+        "tags": ["Comunidade & Social"],
+        "summary": "Criar desafio no grupo",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "startDate": { "type": "string", "format": "date-time" },
+                  "endDate": { "type": "string", "format": "date-time" }
+                },
+                "required": ["title", "startDate", "endDate"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Desafio criado" },
+          "400": { "description": "Erro na criação" }
+        }
+      }
+    },
     "/api/quiz": {
       "get": {
+        "tags": ["Gamificação"],
         "summary": "Listar perguntas do quiz Mito ou Verdade?",
         "security": [{ "bearerAuth": [] }],
         "responses": {
@@ -461,6 +1014,7 @@
     },
     "/api/quiz/answer": {
       "post": {
+        "tags": ["Gamificação"],
         "summary": "Validar resposta do quiz Mito ou Verdade?",
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
@@ -485,9 +1039,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": {
-                    "correct": { "type": "boolean" }
-                  }
+                  "properties": { "correct": { "type": "boolean" } }
                 }
               }
             }
@@ -496,9 +1048,10 @@
         }
       }
     },
-    "/api/teams": {
+    "/api/chat": {
       "post": {
-        "summary": "Criar grupo",
+        "tags": ["Chatbot"],
+        "summary": "Enviar mensagem ao chatbot",
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
@@ -506,259 +1059,16 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {
-                  "name": { "type": "string" },
-                  "description": { "type": "string" }
-                },
-                "required": ["name"]
+                "properties": { "message": { "type": "string" } },
+                "required": ["message"]
               }
             }
           }
         },
         "responses": {
-          "201": { "description": "Grupo criado" },
-          "400": { "description": "Erro na criação" }
+          "200": { "description": "Resposta do chatbot" }
         }
       }
-    },
-    "/api/teams/invite": {
-      "post": {
-        "summary": "Convidar usuário para grupo",
-        "security": [{ "bearerAuth": [] }],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "teamId": { "type": "integer" },
-                  "userId": { "type": "integer" }
-                },
-                "required": ["teamId", "userId"]
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": { "description": "Usuário convidado" },
-          "400": { "description": "Usuário já é membro ou erro" }
-        }
-      }
-    },
-    "/api/teams/{teamId}/challenges": {
-      "post": {
-        "summary": "Criar desafio no grupo",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [
-          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "integer" } }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "title": { "type": "string" },
-                  "description": { "type": "string" },
-                  "startDate": { "type": "string", "format": "date-time" },
-                  "endDate": { "type": "string", "format": "date-time" }
-                },
-                "required": ["title", "startDate", "endDate"]
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": { "description": "Desafio criado" },
-          "400": { "description": "Erro na criação" }
-        }
-      }
-    },
-
-      "/api/auth/login": {
-        "post": {
-          "summary": "Login",
-          "description": "Autentica usuário e retorna JWT",
-          "requestBody": {
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "email": { "type": "string" },
-                    "password_hash": { "type": "string" }
-                  },
-                  "required": ["email", "password_hash"]
-                }
-              }
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "Login bem-sucedido",
-              "content": { "application/json": { "schema": { "type": "object", "properties": { "token": { "type": "string" } } } } }
-            },
-            "401": { "description": "Credenciais inválidas" }
-          }
-        }
-      },
-
-      "/api/profile": {
-        "get": {
-          "summary": "Lista Perfil",
-          "security": [{ "bearerAuth": [] }],
-          "responses": {
-            "200": { "description": "Perfil do usuário", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PerfilUsuario" } } } }
-          }
-        },
-        "post": {
-          "summary": "Salva Perfil",
-          "security": [{ "bearerAuth": [] }],
-          "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PerfilUsuario" } } } },
-          "responses": { "200": { "description": "Perfil salvo" } }
-        }
-      },
-
-      "/api/diary": {
-        "post": {
-          "summary": "Cria postagem no diário",
-          "security": [{ "bearerAuth": [] }],
-          "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DiaryEntry" } } } },
-          "responses": { "201": { "description": "Entry created" } }
-        },
-        "get": {
-          "summary": "Lista postagens do diário",
-          "security": [{ "bearerAuth": [] }],
-          "responses": { "200": { "description": "List of entries", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/DiaryEntry" } } } } } }
-        }
-      },
-
-      "/api/dashboard": {
-        "get": {
-          "summary": "Dashboard do usuário",
-          "security": [{ "bearerAuth": [] }],
-          "responses": { "200": { "description": "Dados agregados do dashboard", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DashboardResponse" } } } } }
-        }
-      },
-
-      "/api/analytics": {
-        "get": {
-          "summary": "Analytics histórico",
-          "security": [{ "bearerAuth": [] }],
-          "parameters": [
-            { "name": "periodo", "in": "query", "schema": { "type": "string", "default": "30" } },
-            { "name": "tipo", "in": "query", "schema": { "type": "string", "enum": ["all", "habitos", "conquistas", "engajamento", "saude"], "default": "all" } }
-          ],
-          "responses": { "200": { "description": "Analytics data", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AnalyticsResponse" } } } } }
-        }
-      },
-
-      "/api/insights": {
-        "get": {
-          "summary": "Insights proativos",
-          "security": [{ "bearerAuth": [] }],
-          "responses": { "200": { "description": "Lista de insights", "content": { "application/json": { "schema": { "type": "object" } } } } }
-        }
-      },
-        "/api/conteudo/categorias": {
-          "get": {
-            "summary": "Listar categorias de conteúdo",
-            "responses": { "200": { "description": "Lista de categorias", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Categoria" } } } } } }
-          }
-        },
-        "/api/conteudo/destaques": {
-          "get": {
-            "summary": "Listar conteúdos em destaque",
-            "responses": { "200": { "description": "Lista de destaques", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Conteudo" } } } } } }
-          }
-        },
-        "/api/conteudo/pesquisar": {
-          "get": {
-            "summary": "Pesquisar conteúdos",
-            "parameters": [ { "name": "q", "in": "query", "schema": { "type": "string" } }, { "name": "categoria", "in": "query", "schema": { "type": "string" } }, { "name": "tipo", "in": "query", "schema": { "type": "string" } }, { "name": "page", "in": "query", "schema": { "type": "integer" } }, { "name": "limit", "in": "query", "schema": { "type": "integer" } } ],
-            "responses": { "200": { "description": "Resultado da pesquisa", "content": { "application/json": { "schema": { "type": "object" } } } } }
-          }
-        },
-        "/api/conteudo/categoria/{categoriaId}": {
-          "get": {
-            "summary": "Listar conteúdos por categoria",
-            "parameters": [ { "name": "categoriaId", "in": "path", "required": true, "schema": { "type": "string" } }, { "name": "page", "in": "query", "schema": { "type": "integer" } }, { "name": "limit", "in": "query", "schema": { "type": "integer" } }, { "name": "tipo", "in": "query", "schema": { "type": "string" } }, { "name": "nivel", "in": "query", "schema": { "type": "string" } } ],
-            "responses": { "200": { "description": "Conteúdos por categoria", "content": { "application/json": { "schema": { "type": "object" } } } } }
-          }
-        },
-        "/api/conteudo/{id}": {
-          "get": {
-            "summary": "Buscar conteúdo por id",
-            "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
-            "responses": { "200": { "description": "Conteúdo", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Conteudo" } } } }, "404": { "description": "Conteúdo não encontrado" } }
-          }
-        },
-        "/api/conteudo": {
-          "post": {
-            "summary": "Criar conteúdo",
-            "security": [{ "bearerAuth": [] }],
-            "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ConteudoCreate" } } } },
-            "responses": { "201": { "description": "Conteúdo criado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Conteudo" } } } } }
-          }
-        },
-
-      "/api/checkups/timeline": {
-        "get": {
-          "summary": "Linha do tempo de checkups",
-          "security": [{ "bearerAuth": [] }],
-          "responses": { "200": { "description": "Timeline com exames recomendados", "content": { "application/json": { "schema": { "type": "object" } } } } }
-        }
-      },
-
-      "/api/checkups/reminder": {
-        "post": {
-          "summary": "Criar/Atualizar lembrete",
-          "security": [{ "bearerAuth": [] }],
-          "requestBody": { "required": false, "content": { "application/json": { "schema": { "type": "object", "properties": { "enabled": { "type": "boolean" }, "frequency_days": { "type": "integer" }, "fcm_token": { "type": "string" } } } } } },
-          "responses": { "200": { "description": "Reminder saved", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReminderSetting" } } } } }
-        }
-      },
-
-      "/api/checkups": {
-        "get": {
-          "summary": "Lista checkups do usuário",
-          "security": [{ "bearerAuth": [] }],
-          "responses": { "200": { "description": "Lista de checkups do usuário", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/UserCheckup" } } } } } }
-        },
-        "post": {
-          "summary": "Cria um checkup",
-          "security": [{ "bearerAuth": [] }],
-          "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserCheckupCreate" } } } },
-          "responses": { "201": { "description": "Checkup created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserCheckup" } } } } }
-        }
-      },
-
-      "/api/checkups/{id}": {
-        "put": {
-          "summary": "Edita checkup do usuário",
-          "security": [{ "bearerAuth": [] }],
-          "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
-          "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserCheckupCreate" } } } },
-          "responses": { "200": { "description": "Checkup updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserCheckup" } } } } }
-        },
-        "delete": {
-          "summary": "Delete checkup",
-          "security": [{ "bearerAuth": [] }],
-          "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
-          "responses": { "200": { "description": "Checkup deleted" } }
-        }
-      },
-      "/api/chat": {
-        "post": {
-          "summary": "Enviar mensagem ao chatbot",
-          "security": [{ "bearerAuth": [] }],
-          "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" } }, "required": ["message"] } } } },
-          "responses": { "200": { "description": "Resposta do chatbot" } }
-        }
-      }
-
+    }
   }
 }
