@@ -167,6 +167,58 @@
     { "bearerAuth": [] }
   ],
   "paths": {
+        "/api/meta": {
+          "post": {
+            "tags": ["Gamificação"],
+            "summary": "Criar meta para o usuário logado",
+            "security": [{ "bearerAuth": [] }],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "titulo": { "type": "string" },
+                      "descricao": { "type": "string" }
+                    },
+                    "required": ["titulo"]
+                  }
+                }
+              }
+            },
+            "responses": {
+              "201": { "description": "Meta criada" },
+              "400": { "description": "Erro na criação" }
+            }
+          }
+        },
+        "/api/progresso": {
+          "post": {
+            "tags": ["Gamificação"],
+            "summary": "Criar progresso para o usuário logado",
+            "security": [{ "bearerAuth": [] }],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "progresso": { "type": "string" },
+                      "descricao": { "type": "string" }
+                    },
+                    "required": ["progresso"]
+                  }
+                }
+              }
+            },
+            "responses": {
+              "201": { "description": "Progresso criado" },
+              "400": { "description": "Erro na criação" }
+            }
+          }
+        },
     "/api/auth/login": {
       "post": {
         "tags": ["Autenticação"],

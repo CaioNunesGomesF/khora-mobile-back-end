@@ -103,7 +103,8 @@ async function seedConteudo() {
                 fonte_credivel: 'Sociedade Brasileira de Urologia',
                 categoria_id: categorias[0].id,
                 tipo_conteudo_id: tiposConteudo[0].id,
-                destaque: true
+                destaque: true,
+                ativo: true 
             },
             {
                 titulo: 'Exame de Próstata: Por que Fazer e Como se Preparar',
@@ -115,7 +116,8 @@ async function seedConteudo() {
                 autor: 'Dr. Roberto Santos',
                 fonte_credivel: 'Instituto Nacional do Câncer',
                 categoria_id: categorias[1].id,
-                tipo_conteudo_id: tiposConteudo[1].id
+                tipo_conteudo_id: tiposConteudo[1].id,
+                ativo: true
             },
             {
                 titulo: 'Ansiedade Masculina: Reconhecendo os Sinais',
@@ -142,7 +144,8 @@ Buscar ajuda é um ato de coragem, não de fraqueza.`,
                 autor: 'Psicólogo João Mendes',
                 fonte_credivel: 'Conselho Federal de Psicologia',
                 categoria_id: categorias[2].id,
-                tipo_conteudo_id: tiposConteudo[0].id
+                tipo_conteudo_id: tiposConteudo[0].id,
+                ativo: true
             },
             {
                 titulo: 'Treino de Força para Homens Após os 40',
@@ -154,7 +157,8 @@ Buscar ajuda é um ato de coragem, não de fraqueza.`,
                 autor: 'Prof. Marcos Fitness',
                 fonte_credivel: 'Conselho Federal de Educação Física',
                 categoria_id: categorias[3].id,
-                tipo_conteudo_id: tiposConteudo[1].id
+                tipo_conteudo_id: tiposConteudo[1].id,
+                ativo: true
             },
             {
                 titulo: 'Alimentação para Aumentar a Testosterona Naturalmente',
@@ -184,7 +188,8 @@ Buscar ajuda é um ato de coragem, não de fraqueza.`,
                 fonte_credivel: 'Conselho Federal de Nutricionistas',
                 categoria_id: categorias[4].id,
                 tipo_conteudo_id: tiposConteudo[0].id,
-                destaque: true
+                destaque: true,
+                ativo: true
             }
         ];
 

@@ -1,4 +1,6 @@
 import forumRoutes from './src/routes/forumRoutes.js';
+import metaRoutes from './src/routes/metaRoutes.js';
+import progressoRoutes from './src/routes/progressoRoutes.js';
 import moodRoutes from './src/routes/moodRoutes.js';
 import saudeMasculinaRoutes from './src/routes/saudeMasculinaRoutes.js';
 import express from 'express';
@@ -49,6 +51,11 @@ app.use('/api/relief', reliefRoutes);
 import quizRoutes from './src/routes/quizRoutes.js';
 app.use('/api', quizRoutes);
 // Rotas de grupos e desafios
+
+// Rotas de metas
+app.use('/api/meta', metaRoutes);
+app.use('/api/progresso', progressoRoutes);
+app.use('/api/forum', forumRoutes);
 app.use('/api/teams', teamRoutes);
 
 // Swagger UI

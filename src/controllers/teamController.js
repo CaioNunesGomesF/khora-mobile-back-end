@@ -1,3 +1,24 @@
+// Listar times do usuário
+async function listUserTeams(req, res) {
+  try {
+    const userId = req.user.id;
+    // Busca times onde o usuário é membro
+    const teams = await prisma.team.findMany({
+      where: {
+        members: {
+          some: { userId }
+        }
+      },
+      include: {
+        members: true,
+        challenges: true
+      }
+    });
+    res.status(200).json(teams);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
 import { PrismaClient } from '../generated/prisma/client.js';
 const prisma = new PrismaClient();
 
@@ -64,5 +85,6 @@ async function createChallenge(req, res) {
 export {
   createTeam,
   inviteToTeam,
-  createChallenge
+  createChallenge,
+  listUserTeams
 };

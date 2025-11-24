@@ -39,8 +39,19 @@ export const getProfile = async (req, res) => {
         // Pega o ID do usuário logado.
         const userId = req.user.id;
         // Filtra e encontra usuário.
-        const profile = await prisma.perfil_usuario.findUnique({ where: { user_id: userId } });
-        // Envia os perfis encontrados como resposta.
+        const profile = await prisma.perfil_usuario.findFirst({ where: { user_id: userId } });
+        // Se não existir perfil, retorna objeto padrão
+        if (!profile) {
+            return res.status(200).json({
+                id: null,
+                user_id: userId,
+                data_nascimento: null,
+                altura_cm: null,
+                peso_kg: null,
+                genero: null
+            });
+        }
+        // Envia o perfil encontrado como resposta.
         res.status(200).json(profile);
 
     } catch (error) {

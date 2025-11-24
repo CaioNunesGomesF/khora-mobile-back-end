@@ -1,7 +1,10 @@
 import express from 'express';
-import { createTeam, inviteToTeam, createChallenge } from '../controllers/teamController.js';
-import auth from '../middlewares/auth.middleware.js';
 const router = express.Router();
+
+// Listar times do usuário
+router.get('/', auth, listUserTeams);
+import auth from '../middlewares/auth.middleware.js';
+import { createTeam, inviteToTeam, createChallenge, listUserTeams } from '../controllers/teamController.js';
 
 // Criar grupo
 router.post('/teams', auth, createTeam);

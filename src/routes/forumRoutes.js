@@ -12,8 +12,8 @@ import auth from '../middlewares/auth.middleware.js';
 const router = express.Router();
 
 // Tópicos
-router.post('/forum/topics', auth, createTopic);
-router.get('/forum/topics', auth, listTopics);
+router.post('/topics', auth, createTopic);
+router.get('/topics', auth, listTopics);
 
 // Pseudônimo
 router.post('/forum/pseudonym', auth, createPseudonym);
