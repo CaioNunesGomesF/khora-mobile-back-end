@@ -1,4 +1,4 @@
-import { PrismaClient } from '../generated/prisma/index.js'; 
+import { PrismaClient } from '../generated/prisma/index.js';
 import { startConversation, continueConversation } from '../service/chat_service.js';
 
 const prisma = new PrismaClient();
@@ -6,16 +6,16 @@ const prisma = new PrismaClient();
 
 export const startChatController = async (req, res) => {
   try {
-    const { id, name, message } = req.body;
+    const { userId, userName, message } = req.body;
 
-    if (!id || !name || !message) {
+    if (!userId || !userName ) {
       return res.status(400).json({
         success: false,
-        message: "Campos 'id', 'name' e 'message' são obrigatórios.",
+        message: "Campos 'userId', 'userName' e 'message' são obrigatórios.",
       });
     }
 
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       return res.status(404).json({ success: false, message: "Usuário não encontrado." });
     }
