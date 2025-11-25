@@ -4,6 +4,16 @@ import jwt from 'jsonwebtoken';
 
 jest.mock('bcryptjs');
 jest.mock('jsonwebtoken');
+jest.mock('../service/two_factor_service.js', () => ({
+    createTwoFactorCode: jest.fn().mockResolvedValue({
+        code: '123456',
+        expiresAt: new Date(Date.now() + 180000),
+        id: 'mock-two-factor-id'
+    }),
+    sendTwoFactorCode: jest.fn().mockResolvedValue({ success: true }),
+    validateTwoFactorCode: jest.fn().mockResolvedValue({ valid: true }),
+    sendResetPasswordCode: jest.fn().mockResolvedValue({ success: true }),
+}));
 global.crypto = {
     randomUUID: jest.fn(() => 'mock-uuid-1234'),
 };
@@ -116,14 +126,14 @@ describe('AuthController', () => {
             };
             mockPrismaUser.findUnique.mockResolvedValue(mockUser);
             bcrypt.compare.mockResolvedValue(true);
-            jwt.sign.mockReturnValue('mock-jwt-token');
 
             await login(req, res);
 
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({
-                message: 'Login bem-sucedido!',
-                token: 'mock-jwt-token'
+                message: 'Código de autenticação enviado para seu email.',
+                userId: 'user-id-123',
+                requiresTwoFactor: true,
             });
         });
 

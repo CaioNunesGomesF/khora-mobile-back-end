@@ -1,9 +1,105 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import "dotenv/config";
 import { PrismaClient } from "../generated/prisma/index.js";
 
 const prisma = new PrismaClient();
-const resend = new Resend(process.env.RESEND_API_KEY);
+
+const {
+  SMTP_HOST,
+  SMTP_PORT = 587,
+  SMTP_USER,
+  SMTP_PASSWORD,
+  SMTP_SERVICE,
+  SMTP_SECURE,
+  SMTP_IGNORE_TLS,
+  MAIL_FROM = "Khora <no-reply@khora.com>",
+} = process.env;
+
+const smtpPortNumber = Number(SMTP_PORT) || 587;
+const smtpSecureFlag =
+  typeof SMTP_SECURE !== "undefined" ? SMTP_SECURE === "true" : undefined;
+
+const transporterOptions = {};
+
+if (SMTP_SERVICE) {
+  transporterOptions.service = SMTP_SERVICE;
+} else if (SMTP_HOST) {
+  transporterOptions.host = SMTP_HOST;
+  transporterOptions.port = smtpPortNumber;
+  transporterOptions.secure =
+    typeof smtpSecureFlag === "boolean"
+      ? smtpSecureFlag
+      : smtpPortNumber === 465;
+}
+
+if (SMTP_USER && SMTP_PASSWORD) {
+  transporterOptions.auth = {
+    user: SMTP_USER,
+    pass: SMTP_PASSWORD,
+  };
+}
+
+if (SMTP_IGNORE_TLS === "true") {
+  transporterOptions.tls = {
+    rejectUnauthorized: false,
+  };
+}
+
+const transporter =
+  SMTP_SERVICE || SMTP_HOST ? nodemailer.createTransport(transporterOptions) : null;
+
+let transporterVerified = false;
+
+const formatSmtpError = (error, actionMessage) => {
+  if (error?.code === "EAUTH") {
+    return new Error(
+      `${actionMessage}: falha na autenticação SMTP. Verifique se os valores de SMTP_USER/SMTP_PASSWORD são aceitos pelo provedor (${SMTP_SERVICE || SMTP_HOST || "desconhecido"}).`,
+      { cause: error }
+    );
+  }
+
+  if (error?.code === "ENOTFOUND" || error?.code === "ECONNECTION") {
+    return new Error(
+      `${actionMessage}: não foi possível conectar ao servidor SMTP ${SMTP_SERVICE || SMTP_HOST || "desconhecido"}.`,
+      { cause: error }
+    );
+  }
+
+  return new Error(actionMessage, { cause: error });
+};
+
+const ensureTransporterReady = async () => {
+  if (!transporter) {
+    throw new Error("Serviço de email não configurado");
+  }
+
+  if (transporterVerified) {
+    return transporter;
+  }
+
+  try {
+    await transporter.verify();
+    transporterVerified = true;
+    return transporter;
+  } catch (error) {
+    throw formatSmtpError(error, "Não foi possível estabelecer conexão com o servidor SMTP");
+  }
+};
+
+const sendEmail = async ({ to, subject, html }) => {
+  const readyTransporter = await ensureTransporterReady();
+
+  try {
+    return await readyTransporter.sendMail({
+      from: MAIL_FROM,
+      to,
+      subject,
+      html,
+    });
+  } catch (error) {
+    throw formatSmtpError(error, "Falha ao enviar email");
+  }
+};
 
 // Gera um código aleatório de 6 dígitos
 export const generateSixDigitCode = () => {
@@ -13,8 +109,7 @@ export const generateSixDigitCode = () => {
 // Envia um email com o código de 2FA
 export const sendTwoFactorCode = async (email, code) => {
   try {
-    const result = await resend.emails.send({
-      from: "Khora <onboarding@resend.dev>",
+    const result = await sendEmail({
       to: email,
       subject: "Seu código de autenticação de dois fatores - Khora",
       html: `
@@ -104,14 +199,13 @@ export const sendTwoFactorCode = async (email, code) => {
     return { success: true, data: result };
   } catch (error) {
     console.error("Erro ao enviar email de 2FA:", error);
-    throw new Error("Falha ao enviar código de autenticação");
+    throw error;
   }
 };
 
 export const sendResetPasswordCode = async (email, code) => {
   try {
-    const result = await resend.emails.send({
-      from: "Khora <onboarding@resend.dev>",
+    const result = await sendEmail({
       to: email,
       subject: "Seu código de verificação de email - Khora",
       html: `
@@ -202,8 +296,8 @@ export const sendResetPasswordCode = async (email, code) => {
     });
     return { success: true, data: result };
   } catch (error) {
-    console.error("Erro ao enviar email de 2FA:", error);
-    throw new Error("Falha ao enviar código de autenticação");
+    console.error("Erro ao enviar email de redefinição de senha:", error);
+    throw error;
   }
 };
 
