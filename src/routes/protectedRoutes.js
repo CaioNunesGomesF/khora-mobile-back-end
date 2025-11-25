@@ -6,6 +6,7 @@ import * as dashboardController from '../controllers/dashboardController.js';
 import * as analyticsController from '../controllers/analyticsController.js';
 import * as checkupsController from '../controllers/checkupsController.js';
 import { getUserHealthScore } from '../controllers/healthScoreController.js';
+import { changePassword } from '../controllers/authController.js';
 import symptomRoutes from './symptomRoutes.js';
 
 
@@ -16,8 +17,9 @@ const router = express.Router();
 // Isso significa que, para acessar esta rota, o cliente DEVE fornecer um token JWT válido.
 router.get('/profile', authMiddleware, profileController.getProfile);
 
-//rota para salvar o perfil de saúde
+//rota para salvar ou atualizar o perfil de saúde
 router.post('/profile', authMiddleware, profileController.saveProfile);
+router.put('/profile', authMiddleware, profileController.saveProfile);
 
 //rota para salvar os registros diários
 router.post('/diary', authMiddleware, diaryController.createDiaryEntry);
@@ -43,6 +45,9 @@ router.get('/insights', authMiddleware, analyticsController.getInsights);
 
 // Health Score Dinâmico
 router.get('/user/health-score', authMiddleware, getUserHealthScore);
+
+// Rota para alterar senha (usuário autenticado)
+router.put('/user/change-password', authMiddleware, changePassword);
 
 // Checkups: timeline e lembretes
 router.get('/checkups/timeline', authMiddleware, checkupsController.getTimeline);

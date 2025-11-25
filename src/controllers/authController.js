@@ -368,3 +368,62 @@ export const resendCodeResetPassword = async (req, res) => {
         });
     }
 };
+
+// Função para alterar senha (usuário autenticado)
+export const changePassword = async (req, res) => {
+    try {
+        const userId = req.user.id; // Pega o ID do usuário do token JWT
+        const { currentPassword, newPassword } = req.body;
+
+        // Validação básica
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({
+                message: 'Senha atual e nova senha são obrigatórias.'
+            });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({
+                message: 'A nova senha deve ter pelo menos 6 caracteres.'
+            });
+        }
+
+        // Busca o usuário no banco
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'Usuário não encontrado.'
+            });
+        }
+
+        // Verifica se a senha atual está correta
+        const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+
+        if (!isMatch) {
+            return res.status(401).json({
+                message: 'Senha atual incorreta.'
+            });
+        }
+
+        // Criptografa a nova senha
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        // Atualiza a senha no banco
+        await prisma.user.update({
+            where: { id: userId },
+            data: { password_hash: hashedPassword }
+        });
+
+        res.status(200).json({
+            message: 'Senha alterada com sucesso.'
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            message: 'Algo deu errado ao alterar a senha.',
+            error: error.message
+        });
+    }
+};

@@ -15,14 +15,19 @@ const {
   MAIL_FROM = "Khora <no-reply@khora.com>",
 } = process.env;
 
+const normalizedSmtpUser = SMTP_USER?.trim();
+const normalizedSmtpPassword = SMTP_PASSWORD?.replace(/\s+/g, "");
+const resolvedSmtpService =
+  SMTP_SERVICE || (SMTP_HOST?.includes("gmail") ? "gmail" : undefined);
+
 const smtpPortNumber = Number(SMTP_PORT) || 587;
 const smtpSecureFlag =
   typeof SMTP_SECURE !== "undefined" ? SMTP_SECURE === "true" : undefined;
 
 const transporterOptions = {};
 
-if (SMTP_SERVICE) {
-  transporterOptions.service = SMTP_SERVICE;
+if (resolvedSmtpService) {
+  transporterOptions.service = resolvedSmtpService;
 } else if (SMTP_HOST) {
   transporterOptions.host = SMTP_HOST;
   transporterOptions.port = smtpPortNumber;
@@ -32,10 +37,10 @@ if (SMTP_SERVICE) {
       : smtpPortNumber === 465;
 }
 
-if (SMTP_USER && SMTP_PASSWORD) {
+if (normalizedSmtpUser && normalizedSmtpPassword) {
   transporterOptions.auth = {
-    user: SMTP_USER,
-    pass: SMTP_PASSWORD,
+    user: normalizedSmtpUser,
+    pass: normalizedSmtpPassword,
   };
 }
 

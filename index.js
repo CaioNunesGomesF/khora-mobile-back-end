@@ -3,6 +3,7 @@ import metaRoutes from './src/routes/metaRoutes.js';
 import progressoRoutes from './src/routes/progressoRoutes.js';
 import moodRoutes from './src/routes/moodRoutes.js';
 import saudeMasculinaRoutes from './src/routes/saudeMasculinaRoutes.js';
+import habitoRoutes from './src/routes/habitoRoutes.js';
 import express from 'express';
 import 'dotenv/config';
 import authRoutes from './src/routes/authRoutes.js';
@@ -19,7 +20,7 @@ import path from 'path';
 const app = express();
 
 // Define a porta do servidor
-const PORT = process.env.PORT 
+const PORT = process.env.PORT
 
 app.use(express.json());
 
@@ -55,8 +56,12 @@ app.use('/api', quizRoutes);
 // Rotas de metas
 app.use('/api/meta', metaRoutes);
 app.use('/api/progresso', progressoRoutes);
+app.use('/api/habitos', habitoRoutes);
 app.use('/api/forum', forumRoutes);
 app.use('/api/teams', teamRoutes);
+
+// Rotas de humor (mood)
+app.use('/api', moodRoutes);
 
 // Swagger UI
 try {
